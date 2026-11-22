@@ -1,0 +1,55 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.miapkstudio.mistudiopro'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.miapkstudio.mistudiopro'
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName '1.0'
+    }
+
+    // GitHub Actions-এ KEYSTORE_FILE সেট থাকলে নিজের কী দিয়ে সাইন হয়, না থাকলে ডিবাগ কী দিয়ে (ইনস্টলযোগ্য)
+    def ksFile = System.getenv("KEYSTORE_FILE")
+    signingConfigs {
+        if (ksFile) {
+            release {
+                storeFile file(ksFile)
+                storePassword System.getenv("KEYSTORE_PASSWORD")
+                keyAlias System.getenv("KEY_ALIAS")
+                keyPassword System.getenv("KEY_PASSWORD")
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig ksFile ? signingConfigs.release : signingConfigs.debug
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    // "_" দিয়ে শুরু হওয়া ফোল্ডার (যেমন _next) যেন assets থেকে বাদ না পড়ে
+    androidResources {
+        ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:CVS:thumbs.db:picasa.ini:*~'
+    }
+
+    lint {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+}
+
+dependencies {
+    implementation 'androidx.core:core:1.13.1'
+}
